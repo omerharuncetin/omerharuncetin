@@ -1,5 +1,5 @@
 <a href="https://github.com/omerharuncetin">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=500&size=24&pause=1000&color=326CE5&center=false&vCenter=false&width=600&lines=Platform+Engineer;DevOps+%26+Cloud+Native+Specialist;Building+scalable%2C+self-healing+systems" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=500&size=24&pause=1000&color=326CE5&center=false&vCenter=false&width=600&lines=Distributed+Systems+Engineer;Platform+Engineer;DevOps+%26+Cloud+Native+Specialist;Building+scalable%2C+self-healing+systems" alt="Typing SVG" />
 </a>
 
 ```yaml
@@ -10,7 +10,7 @@ metadata:
   namespace: platform-engineering
 spec:
   title: "Distributed Systems"
-  philosophy: "Treat infrastructure as software—declarative, immutable, and automated."
+    experience: "5+ years Software Engineering"
   current_focus:
     - Kubernetes
     - Confidential Computing
