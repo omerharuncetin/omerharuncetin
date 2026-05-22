@@ -29,38 +29,54 @@ I build secure, automated infrastructure using GitOps and CI/CD principles. My h
 * **Resilient Data:** CloudNativePG operator handling Postgres failovers.
 
 <details>
-<summary><b>🗺️ Click to view my standard GitOps Architecture</b></summary>
+<summary><b>🗺️ Click to view my Homelab Architecture</b></summary>
 
 ```mermaid
 graph TD
-    %% GitOps Flow
-    Dev["Developer Commit"] -->|Git Push| Git["GitHub / Gitea"]
-    Flux["Flux CD"] -->|Poll / Webhook| Git
-    Flux -->|Reconcile State| Cluster["k3s Kubernetes Cluster"]
+    Dev["Developer Commit"] -->|Git Push| Git["Gitea Self-Hosted Git"]
+    Git -->|Webhook / Poll| Flux{"Flux CD Reconciler"}
+    Flux -->|Decrypt Secrets| SOPS["SOPS + age"]
+    SOPS -->|Inject| K3s["k3s Control Plane"]
+    Flux -->|Helm Releases| K3s
 
-    %% Traffic Flow
-    User["User / Client"] -->|HTTPS| LB["Load Balancer / CDN"]
-    LB -->|Proxy| Ingress["Traefik Ingress Controller"]
-    
-    %% Cache, Scaler & Apps
-    Ingress -->|Cache Lookup| Cache["Redis Cache"]
-    Ingress -->|Scale-to-Zero| Sablier["Sablier Middleware"]
-    
-    Sablier -->|Route| Pods["Application Pods"]
-    Pods -->|Query| Cache
-    
-    %% Databases
-    Pods -->|Read / Write| PrimaryDB["CNPG Primary DB"]
-    PrimaryDB -->|Replicate| StandbyDB["CNPG Standby DB"]
+    Client["External Client"] -->|Encrypted Tunnel| Tailscale["Tailscale Mesh VPN"]
+    Tailscale -->|DNS Query| AdGuard["AdGuard Home DNS"]
+    AdGuard -->|Resolve *.omer-lab.com| Nginx["Nginx Reverse Proxy"]
+    Nginx --> Traefik["Traefik Ingress Controller"]
 
-    %% Styling
-    style Flux fill:#8A2BE2,stroke:#333,stroke-width:1px,color:#fff
-    style Cluster fill:#326ce5,stroke:#333,stroke-width:1px,color:#fff
-    style LB fill:#F38020,stroke:#333,stroke-width:1px,color:#fff
-    style Ingress fill:#24A1C1,stroke:#333,stroke-width:1px,color:#fff
-    style Cache fill:#DC382D,stroke:#333,stroke-width:1px,color:#fff
-    style PrimaryDB fill:#316192,stroke:#333,stroke-width:1px,color:#fff
+    Traefik -->|Direct Route| Critical["Critical Services: Gitea, Nextcloud, Home Assistant, Vaultwarden"]
+    Traefik -->|Sablier Middleware| Sablier["Sablier Scale-to-Zero"]
+    Sablier -->|Wake on Request| Ephemeral["Ephemeral Workloads: Stirling PDF, Paperless-ngx"]
+
+    Critical -->|Connection Pool| PG_Primary["CloudNativePG Primary"]
+    Ephemeral -->|Connection Pool| PG_Primary
+    PG_Primary -->|Streaming WAL Replication| PG_Standby["CloudNativePG Standby"]
+    PG_Primary -->|Scheduled Backups| Backup["Backup Volume HDD"]
+
+    Critical -->|Read/Write Cache| Redis["Redis Cache Layer"]
+
+    K3s -->|Scrape Metrics| Prometheus["Prometheus"]
+    Prometheus -->|Dashboard| Grafana["Grafana"]
+
+    SSD["NVMe SSD Tier"] -.->|High IOPS| PG_Primary
+    HDD["1TB HDD Tier"] -.->|Bulk Storage| Backup
+
+    style Flux fill:#8A2BE2,stroke:#333,stroke-width:2px,color:#fff
+    style K3s fill:#326ce5,stroke:#333,stroke-width:2px,color:#fff
+    style Traefik fill:#24A1C1,stroke:#333,stroke-width:2px,color:#fff
+    style PG_Primary fill:#316192,stroke:#333,stroke-width:2px,color:#fff
+    style PG_Standby fill:#316192,stroke:#333,stroke-width:1px,color:#fff
+    style Prometheus fill:#E6522C,stroke:#333,stroke-width:2px,color:#fff
+    style Grafana fill:#F46800,stroke:#333,stroke-width:2px,color:#fff
+    style Redis fill:#DC382D,stroke:#333,stroke-width:2px,color:#fff
+    style Tailscale fill:#E05A47,stroke:#333,stroke-width:2px,color:#fff
+    style SOPS fill:#32CD32,stroke:#333,stroke-width:2px,color:#fff
+    style Sablier fill:#FF8C00,stroke:#333,stroke-width:2px,color:#fff
+    style AdGuard fill:#68BC71,stroke:#333,stroke-width:2px,color:#fff
+    style Nginx fill:#009639,stroke:#333,stroke-width:2px,color:#fff
 ```
+
+
 </details>
 
 ---
